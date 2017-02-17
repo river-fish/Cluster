@@ -28,3 +28,5 @@ for (i in 1:2){
   df <- merge(df, res)
 }
 
+d = dist(genotypesImputed, method="binary")
+hc = data.frame(cutree(hclust(d, method="average"), k=11))
