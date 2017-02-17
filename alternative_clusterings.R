@@ -1,7 +1,10 @@
-# hierarchical clustering adjusted to our needs
+binary_distance <- function(gene_patient_data){
+  return(dist(gene_patient_data, method="binary"))
+}
+
+# hierachical clustering on binary data
 hierarchical <- function(gene_patient_data){
-  d = dist(gene_patient_data, method="binary")
-  hc = data.frame(cutree(hclust(d, method="average"), k=11))
+  hc = data.frame(cutree(hclust(binary_distance(gene_patient_data), method="average"), k=11))
   colnames(hc) <- 'cluster_id'
   return(hc)
 }
@@ -13,6 +16,7 @@ km <- function(gene_patient_data, k){
 
 
 df <- hierarchical(genotypesImputed)
+heatmap(binary_distance(df))
 
 N <- 100
 for (i in 1:2){
