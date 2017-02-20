@@ -1,5 +1,9 @@
 #Fitting DP mixture model for genomic data as in paper, default parameters are those applied wihin the paper
 
+library(CoxHD) # library(devtools); install_github("mg14/CoxHD/CoxHD")
+library(mg14) # library(devtools); install_github("mg14/mg14")
+library(hdp) # devtools::install_github("nicolaroberts/hdp", build_vignettes = FALSE)
+
 HDP_genomic_fit <- function(Imputed_genotypes,
                             shape=1,invscale=1, #Prior parameters for concentration parameters
                             burnin = 5000, #Burnin for markov chain 
@@ -7,6 +11,7 @@ HDP_genomic_fit <- function(Imputed_genotypes,
                             spacebw = 20, #space between posterior samples
                             cpsamples = 10,
                             seed=42){ #Number of concentration mixing step between posterior samples
+
   n <- ncol(Imputed_genotypes)
   hdp <- hdp_init(ppindex=0, #index of the parent DP for initial DP
                   cpindex=1, #index of alphaa and alphab for initial DP
