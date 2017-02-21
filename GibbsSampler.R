@@ -8,12 +8,12 @@ SingleGibbs <- function(beta, alpha, w, theta, Z, X){
   # Z - a vector of length 1540 (nr of patients); contains integers between 1 and 10
   # X - data
   
-  colsums <- colSums(X)
   K = length(w) # nr of clusters
   n = nrow(X) # nr of patients
 
   # update of weights of clusters 
   w_new <- rdirichlet(1, beta + sapply(1:K, function(i) sum(Z==i)))
+  
   
  
   # update of Z
@@ -49,27 +49,13 @@ FullGibbs <- function(n_iter, X, w_start, theta_start, Z_start, alpha = rep(1/84
   output_list <- list()
   for (i in 1:n_iter){
     output <- SingleGibbs(beta, alpha, w, theta, Z, X)
-    w <- out$w
-    theta <- out$theta
-    Z <- out$Z
+    w <- output$w
+    theta <- output$theta
+    Z <- output$Z
     output_list[[i]] <- output
   }
   return(output_list)
 }
 
 # ----------------------------------------------------------------
-# preparing initial data 
-m=84
-K = 10
-X <- genotypesImputed
 
-beta <- rep(1/K, times=K)
-alpha <- rep(1/m, times=m)
-w = rep(1/10, times =10)
-Z <- sample(1:K, nrow(X), prob=w, replace = TRUE)
-theta <- rdirichlet(K, alpha)
-
-
-result <- FullGibbs(100, X = X, w_start = w, theta_start = theta, Z_start = Z)
-length(result)
-summary(as.factor(result[[99]]$Z))
