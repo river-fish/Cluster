@@ -16,14 +16,14 @@ km <- function(gene_patient_data, k=11){
 }
 
 
-df1 <- hierarchical(genotypesImputed)
-head(df1)
-df2 <- km(genotypesImputed)
-
-table(df1[,1], df2[,1])
-
-k <- length(table(summary(df1$cluster_id)))
-print(k)
+# df1 <- hierarchical(genotypesImputed)
+# head(df1)
+# df2 <- km(genotypesImputed)
+# 
+# table(df1[,1], df2[,1])
+# 
+# k <- length(table(summary(df1$cluster_id)))
+# print(k)
 
 
 # ConcordanceFunction_ver2<- function(df1, df2){
@@ -52,23 +52,36 @@ print(k)
 # }
 
 
-ConcordanceFunction <- function(df1, df2){
+ConcordanceFunction <- function(df1, df2, same_patients=TRUE){
+  
+  if (same_patients==FALSE) {
+    df2 = df2[df2$patient_id %in% df1$patient_id,]
+    df1 = df1[!duplicated(df1$patient_id),]
+    rownames(df2) <- df2$patient_id
+    rownames(df1) <- df1$patient_id
+  }
+  
   if(nrow(df1)!=nrow(df2)){
     stop('The number of rows in the data frames are not equal')
   }
-  df2_ordered <- df2[rownames(df1),]
+  
+  df2_order <- df2[rownames(df1),1:1]
+  df2_ordered <- data.frame(cluster_id=df2_order, row.names = rownames(df1))
   counts <- sapply(seq_len(nrow(df1)), function(k){
     count = 0
     for (i in seq_len(k-1)){
-      if((df1$cluster_id[k] == df1$cluster[i]) & (df2_ordered$cluster_id[k] == df2_ordered$cluster[i])) count = count +1
-      else if ((df1$cluster_id[k] != df1$cluster[i]) & (df2_ordered$cluster_id[k] != df2_ordered$cluster[i])) count = count +1
+      if((df1$cluster_id[k] == df1$cluster_id[i]) & (df2_ordered$cluster_id[k] == df2_ordered$cluster_id[i])) {
+        count = count +1
+      } else {
+        if((df1$cluster_id[k] != df1$cluster_id[i]) & (df2_ordered$cluster_id[k] != df2_ordered$cluster_id[i])) count = count +1
+      }
     }
     return(count)
   })
   return(sum(counts)/choose(nrow(df1),2))
 }
 
-ConcordanceFunction(df1[1:1000,], df1[1:1000,])
+#ConcordanceFunction(df1[1:1000,], df1[1:1000,])
 
 
 
@@ -91,4 +104,4 @@ ConcordanceFunction(df1[1:1000,], df1[1:1000,])
 # 
 # 
 # system.time(ConcordanceFunctionF(df1[1:1000,], df1[1:1000,]))
-system.time(ConcordanceFunction(df1[1:1000,], df1[1:1000,]))
+#system.time(ConcordanceFunction(df1[1:1000,], df1[1:1000,]))
