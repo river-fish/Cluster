@@ -53,6 +53,7 @@ print(k)
 
 
 ConcordanceFunction <- function(df1, df2){
+  #df1, df2 - data frames containing a column cluster_id
   if(nrow(df1)!=nrow(df2)){
     stop('The number of rows in the data frames are not equal')
   }
