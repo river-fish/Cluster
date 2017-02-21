@@ -1,92 +1,46 @@
 library(parallel)
 source("HDP_genomic_fit.R")
 load("genotypesImputed.Rdata")
+source("Output_to_Posterior.R")
 
 start = Sys.time()
 
-times = 4
+times = 2
+N = 2
 
 set.seed(1)
 
 X = mclapply(1:times,function(t){
-  if (t==1) {
-   
-    list_a <- lapply(1:25, function(i){
-      bootstrapped_genotypesImputed <- genotypesImputed[sample(1:nrow(genotypesImputed), nrow(genotypesImputed),  replace = TRUE),]
-      a = HDP_genomic_fit(bootstrapped_genotypesImputed,
-                          shape=1,invscale=1, #Prior parameters for concentration parameters
-                          burnin = 5000, #Burnin for markov chain 
-                          postsamples = 10000, #Number of posterior samples
-                          spacebw = 20, #space between posterior samples
-                          cpsamples = 10,
-                          seed=1)
-      
-      save(a, file = paste0(i, "_a.RData"))
-      
-      return(a)
-      
-    })
-    return(list_a)
-    
-  }
   
-  if (t==2) {
-   
-    list_b <- lapply(1:25, function(i){
-      bootstrapped_genotypesImputed <- genotypesImputed[sample(1:nrow(genotypesImputed), nrow(genotypesImputed),  replace = TRUE),]
-      b = HDP_genomic_fit(bootstrapped_genotypesImputed,
-                          shape=1,invscale=1, #Prior parameters for concentration parameters
-                          burnin = 5000, #Burnin for markov chain 
-                          postsamples = 10000, #Number of posterior samples
-                          spacebw = 20, #space between posterior samples
-                          cpsamples = 10,
-                          seed=2)
-      
-      save(b, file = paste0(i, "_b.RData"))
-     
-      return(b)
-    })
-    return(list_b)
+  for(j in 1:times){
+    
+    if(t==j){
+      list_runs <- lapply(1:N, function(i){
+        bootstrapped_genotypesImputed <- genotypesImputed[sample(1:nrow(genotypesImputed), nrow(genotypesImputed),  replace = TRUE),]
+        a = HDP_genomic_fit(bootstrapped_genotypesImputed,
+                            shape=1,invscale=1, #Prior parameters for concentration parameters
+                            burnin = 1, #Burnin for markov chain 
+                            postsamples = 3, #Number of posterior samples
+                            spacebw = 20, #space between posterior samples
+                            cpsamples = 10,
+                            seed=1)
+        
+        a_merged = hdp_extract_components(a, cos.merge = 0.95)
+        
+        a_post = posterior_quantities(a_merged)
+        
+        vec <- apply(a_post$posteriorProbability,2, which.max)
+        print(length(rownames(bootstrapped_genotypesImputed)))
+        df_post_clust <- data.frame(cluster_id=vec, patient_id = rownames(bootstrapped_genotypesImputed))
+        
+        save(df_post_clust, file = paste0(j, "_" , i,"_df_post_clust.RData"))
+      }
+      )
+      return("success")
+    }
   }
-  
-  if (t==3) {
-    list_c <- lapply(1:25, function(i){
-      bootstrapped_genotypesImputed <- genotypesImputed[sample(1:nrow(genotypesImputed), nrow(genotypesImputed),  replace = TRUE),]
-      c = HDP_genomic_fit(bootstrapped_genotypesImputed,
-                          shape=1,invscale=1, #Prior parameters for concentration parameters
-                          burnin = 5000, #Burnin for markov chain 
-                          postsamples = 10000, #Number of posterior samples
-                          spacebw = 20, #space between posterior samples
-                          cpsamples = 10,
-                          seed=3)
-      
-      save(c, file = paste0(i, "_c.RData"))
-      return(c)
-    })
-    
-    
-    
-    return(list_c)
-  }
-  if (t==4) {
-    list_d <- lapply(1:25, function(i){
-      bootstrapped_genotypesImputed <- genotypesImputed[sample(1:nrow(genotypesImputed), nrow(genotypesImputed),  replace = TRUE),]
-      d = HDP_genomic_fit(bootstrapped_genotypesImputed,
-                          shape=1,invscale=1, #Prior parameters for concentration parameters
-                          burnin = 5000, #Burnin for markov chain 
-                          postsamples = 10000, #Number of posterior samples
-                          spacebw = 20, #space between posterior samples
-                          cpsamples = 10,
-                          seed=4)
-      
-      save(d, file = paste0(i, "_d.RData"))
-      
-      return(d)
-    })
-    
-    return(list_d)
-}}
-  
+}
+
 ,mc.cores = times)
 
 now = Sys.time()
