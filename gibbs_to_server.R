@@ -1,7 +1,7 @@
 library(MCMCpack)
 
 source('GibbsSampler.R')
-
+load('genotypesImputed.Rdata')
 # preparing initial data 
 m=84
 K = 11
@@ -13,7 +13,7 @@ w = rep(1/K, times =K)
 Z <- sample(1:K, nrow(X), prob=w, replace = TRUE)
 theta <- rdirichlet(K, alpha)
 
-N <- 50000
+N <- 10000
 system.time(
 result <- FullGibbs(N, X = X, w_start = w, theta_start = theta, Z_start = Z, alpha = alpha, beta=beta)
 )

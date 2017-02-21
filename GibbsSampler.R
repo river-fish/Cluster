@@ -34,7 +34,14 @@ SingleGibbs <- function(beta, alpha, w, theta, Z, X){
   # update theta
   #theta_new <- theta
   list_new_thetas <- lapply(1:K, function(k){
-    rdirichlet(1, alpha + colSums(X[Z_new==k,]))
+    #new code
+    len_cluster <- sum(Z_new==k) # how many elements of Z_new are equal to k
+    
+    if (len_cluster==0) alpha_new <- alpha
+    if (len_cluster==1) alpha_new <- alpha + X[Z_new==k,]
+    if (len_cluster>1) alpha_new <- alpha + colSums(X[Z_new==k,])
+    
+    rdirichlet(1, alpha_new)
   })
   
   theta_new <- t(matrix(unlist(list_new_thetas), nrow =ncol(theta)))
