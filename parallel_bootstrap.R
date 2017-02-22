@@ -1,11 +1,16 @@
+setwd("/homes/loach/Cluster")
+wd = getwd()
+print(wd)
 library(parallel)
 source("HDP_genomic_fit.R")
+print("The file is running")
 load("genotypesImputed.Rdata")
+print("genotypes loaded")
 source("Output_to_Posterior.R")
 
 start = Sys.time()
 
-times = 15
+times = 2
 N = 8
 
 set.seed(1)
@@ -45,3 +50,21 @@ X = mclapply(1:times,function(t){
 
 now = Sys.time()
 print(now - start)
+
+load("genotypesImputed.Rdata")
+source("alternative_clusterings.R")
+
+#load in the cluster assignments from the paper and create dataframe
+load("Simply_cluster.Rdata")
+df2 = data.frame(cluster_id=as.numeric(as.character(dpClass)), patient_id=rownames(genotypesImputed))
+
+result_concordance_boot <- lapply(1:times, function(j){
+  return(sapply(1:N, function(i){
+    load(file=paste0("bootstrapped_data/",j, "_" , i,"_df_post_clust.RData")) #load the cluster assigments from a bootstrapped dataset
+    ConcordanceFunction(df_post_clust, df2, same_patients=FALSE)
+  }))
+})
+
+save(unlist(result_concordance_boot), "bootstrap_concordances.RData")
+
+hist(unlist(result_concordance_boot))

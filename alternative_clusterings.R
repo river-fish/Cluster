@@ -12,7 +12,7 @@ hierarchical <- function(gene_patient_data, k=11){
 
 # kmeans function adjusted to our needs
 km <- function(gene_patient_data, k=11){
-  data.frame(cluster_id = kmeans(gene_patient_data, k)$cluster, patient_id = rownames(gene_patient_data))
+  data.frame(cluster_id = kmeans(gene_patient_data, k, iter.max = 100, nstart = 5)$cluster, patient_id = rownames(gene_patient_data))
 }
 
 
@@ -67,6 +67,7 @@ ConcordanceFunction <- function(df1, df2, same_patients=TRUE){
   
   df2_order <- df2[rownames(df1),1:1]
   df2_ordered <- data.frame(cluster_id=df2_order, row.names = rownames(df1))
+  
   counts <- sapply(seq_len(nrow(df1)), function(k){
     count = 0
     for (i in seq_len(k-1)){
