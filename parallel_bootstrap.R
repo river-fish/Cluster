@@ -5,8 +5,8 @@ source("Output_to_Posterior.R")
 
 start = Sys.time()
 
-times = 2
-N = 2
+times = 15
+N = 8
 
 set.seed(1)
 
@@ -19,8 +19,8 @@ X = mclapply(1:times,function(t){
         bootstrapped_genotypesImputed <- genotypesImputed[sample(1:nrow(genotypesImputed), nrow(genotypesImputed),  replace = TRUE),]
         a = HDP_genomic_fit(bootstrapped_genotypesImputed,
                             shape=1,invscale=1, #Prior parameters for concentration parameters
-                            burnin = 1, #Burnin for markov chain 
-                            postsamples = 3, #Number of posterior samples
+                            burnin = 5000, #Burnin for markov chain 
+                            postsamples = 10000, #Number of posterior samples
                             spacebw = 20, #space between posterior samples
                             cpsamples = 10,
                             seed=1)
@@ -33,7 +33,7 @@ X = mclapply(1:times,function(t){
         print(length(rownames(bootstrapped_genotypesImputed)))
         df_post_clust <- data.frame(cluster_id=vec, patient_id = rownames(bootstrapped_genotypesImputed))
         
-        save(df_post_clust, file = paste0(j, "_" , i,"_df_post_clust.RData"))
+        save(df_post_clust, file = paste0("bootstrapped_data/",j, "_" , i,"_df_post_clust.RData"))
       }
       )
       return("success")
