@@ -1,0 +1,52 @@
+
+R version 3.3.1 (2016-06-21) -- "Bug in Your Hair"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(MCMCpack)
+Loading required package: coda
+Loading required package: MASS
+##
+## Markov Chain Monte Carlo Package (MCMCpack)
+## Copyright (C) 2003-2017 Andrew D. Martin, Kevin M. Quinn, and Jong Hee Park
+##
+## Support provided by the U.S. National Science Foundation
+## (Grants SES-0350646 and SES-0350613)
+##
+> load('genotypesImputed.Rdata')
+> source('GibbsSampler.R')
+> 
+> # preparing initial data 
+> m=84
+> K = 11
+> X <- genotypesImputed
+> 
+> beta <- rep(1/K, times=K)
+> alpha <- rep(1/m, times=m)
+> w = rep(1/K, times =K)
+> Z <- sample(1:K, nrow(X), prob=w, replace = TRUE)
+> theta <- rdirichlet(K, alpha)
+> 
+> N <- 50000
+> system.time(
++ result <- FullGibbs(N, X = X, w_start = w, theta_start = theta, Z_start = Z, alpha = alpha, beta=beta)
++ )
+Error in colSums(X[Z_new == k, ]) : 
+  'x' must be an array of at least two dimensions
+Calls: system.time ... SingleGibbs -> lapply -> FUN -> rdirichlet -> colSums
+Timing stopped at: 16.422 0.003 16.457 
+Execution halted
